@@ -1,0 +1,305 @@
+{
+  "title": "React Front-End Developer Interview Q&A",
+  "source": "Customised prep guide for Prathamesh Pakhare — React role (Angular/Java background)",
+  "categories": [
+    {
+      "id": "hooks",
+      "label": "React Hooks",
+      "questions": [
+        {
+          "id": "hooks_1",
+          "question": "What is the difference between useEffect and useLayoutEffect?",
+          "difficulty": "Medium",
+          "round": "React Core",
+          "answer": "Both run after a render, but the timing is different. useEffect runs asynchronously after the browser has painted the screen — so the user sees the update first, then the effect runs. useLayoutEffect runs synchronously after the DOM update but before the browser paints, which means it can block the visual update. In practice, use useEffect for almost everything — API calls, subscriptions, logging. Only reach for useLayoutEffect if you need to measure a DOM element's size or position and update it before the user sees a flash — like a tooltip that needs to reposition itself.",
+          "tip": "Angular angle: Think of useLayoutEffect as running during the rendering phase, useEffect as running after — like ngAfterViewInit but non-blocking."
+        },
+        {
+          "id": "hooks_2",
+          "question": "How do you prevent unnecessary re-renders in React?",
+          "difficulty": "Medium",
+          "round": "React Core",
+          "answer": "There are a few layers. First, React.memo — wrapping a component so it only re-renders if its props actually change, like OnPush change detection in Angular. Second, useCallback to stabilise function references passed as props, so the memoized child doesn't re-render just because the parent re-created the function. Third, useMemo for expensive computed values. And structurally — keeping state as local as possible so a state change doesn't cause the whole tree to re-render. In production apps, the most impactful fix is usually the structural one: lifting state too high is the most common cause of performance issues.",
+          "code": "const Child = React.memo(({ onDelete }) => {\n  return <button onClick={onDelete}>Delete</button>;\n});\n\nfunction Parent() {\n  const [count, setCount] = useState(0);\n  // Without useCallback, Child re-renders every time Parent does\n  const handleDelete = useCallback(() => deleteItem(), []);\n  return <Child onDelete={handleDelete} />;\n}",
+          "tip": null
+        },
+        {
+          "id": "hooks_3",
+          "question": "When would you use useCallback vs useMemo?",
+          "difficulty": "Medium",
+          "round": "React Core",
+          "answer": "Simple rule: useMemo for values, useCallback for functions. useMemo runs a function and caches its return value — use it when you have a calculation that's expensive and depends on specific inputs. useCallback caches the function itself — use it when you're passing a function as a prop to a memoized child and you don't want the child to re-render because the parent re-created the function reference.",
+          "code": "// useMemo — don't recalculate filteredList unless data or query changes\nconst filteredList = useMemo(() => {\n  return data.filter(item => item.name.includes(query));\n}, [data, query]);\n\n// useCallback — don't recreate this function unless userId changes\nconst handleDelete = useCallback((id) => {\n  deleteItem(userId, id);\n}, [userId]);",
+          "tip": "Premature optimisation with hooks is a real antipattern — profile first, then apply memoisation where it actually matters."
+        },
+        {
+          "id": "hooks_4",
+          "question": "Explain the React reconciliation algorithm and the virtual DOM.",
+          "difficulty": "Medium",
+          "round": "React Core",
+          "answer": "React keeps a virtual DOM — a lightweight JavaScript representation of the actual DOM. When state or props change, React creates a new virtual DOM tree and diffs it against the previous one. This diffing is called reconciliation. React uses a heuristic algorithm — it compares nodes level by level and assumes components of the same type produce similar trees. The key prop is critical here: it tells React the identity of a list item. Without a stable key, React can't tell if a list item moved or changed, and re-renders more than needed.",
+          "tip": "Follow-up: 'What happens if you use array index as a key?' — Answer: it causes bugs when list order changes, because React matches by index not by identity."
+        },
+        {
+          "id": "hooks_5",
+          "question": "What are controlled vs uncontrolled components?",
+          "difficulty": "Easy",
+          "round": "React Core",
+          "answer": "A controlled component is one where React owns the input value — you store it in state and pass it back as the value prop, so React is the single source of truth. An uncontrolled component lets the DOM manage its own state — you read the value using a ref when you need it. Use controlled components for almost everything because they make validation, conditional logic, and form submission much simpler. Uncontrolled components are useful for integrating with non-React libraries or for file inputs where you can't control the value anyway.",
+          "code": "// Controlled\nconst [email, setEmail] = useState('');\n<input value={email} onChange={e => setEmail(e.target.value)} />\n\n// Uncontrolled\nconst emailRef = useRef();\n<input ref={emailRef} />\n// read it later: emailRef.current.value",
+          "tip": null
+        },
+        {
+          "id": "hooks_6",
+          "question": "How does useReducer work and when is it better than useState?",
+          "difficulty": "Medium",
+          "round": "React Core",
+          "answer": "useReducer takes a reducer function and initial state, and returns the current state and a dispatch function. You dispatch an action — an object describing what happened — and the reducer decides the new state. It's better than useState when you have multiple related state fields that change together, or when the next state depends on the previous state in complex logic. Rule of thumb: if you find yourself writing three or four useState calls that all update together, consolidate them into a useReducer.",
+          "code": "const initialState = { loading: false, data: null, error: null };\n\nfunction reducer(state, action) {\n  switch (action.type) {\n    case 'FETCH_START':   return { ...state, loading: true, error: null };\n    case 'FETCH_SUCCESS': return { loading: false, data: action.payload, error: null };\n    case 'FETCH_ERROR':   return { loading: false, data: null, error: action.error };\n    default: return state;\n  }\n}\n\nconst [state, dispatch] = useReducer(reducer, initialState);\n// dispatch({ type: 'FETCH_START' })",
+          "tip": "Coming from Java: this pattern feels like a finite state machine — predictable, testable, and maps well to how backend state transitions work."
+        }
+      ]
+    },
+    {
+      "id": "state",
+      "label": "State Management",
+      "questions": [
+        {
+          "id": "state_1",
+          "question": "When would you use Context API vs Redux vs Zustand?",
+          "difficulty": "Medium",
+          "round": "State Management",
+          "answer": "Context API is built into React and great for low-frequency global data like auth state, theme, or locale — data that doesn't change often. It becomes a problem for high-frequency updates because every consumer re-renders when the context value changes. Redux is the right choice for large applications with complex state interactions, multiple developers, and a need for strict patterns and devtools. Zustand sits in the middle — it's minimal, has no Provider boilerplate, and doesn't cause unnecessary re-renders because components subscribe to specific slices.",
+          "tip": "Recoil background maps here: 'I've used Recoil which follows a similar atom subscription model to Zustand — components only re-render when the atoms they subscribe to change.'"
+        },
+        {
+          "id": "state_2",
+          "question": "What problems does Redux solve? Explain the action → reducer → store flow.",
+          "difficulty": "Medium",
+          "round": "State Management",
+          "answer": "Redux solves the problem of shared state across many components that have no direct parent-child relationship. The flow is: a component dispatches an action — a plain object with a type and optional payload. The reducer — a pure function — receives the current state and the action and returns a new state. The store holds that state and notifies subscribed components. Redux Toolkit modernises this by replacing boilerplate with slices — you define state, reducers, and auto-generated action creators in one place.",
+          "code": "const cartSlice = createSlice({\n  name: 'cart',\n  initialState: { items: [], total: 0 },\n  reducers: {\n    addItem: (state, action) => {\n      state.items.push(action.payload);\n    },\n    clearCart: (state) => {\n      state.items = [];\n    }\n  }\n});\n\nexport const { addItem, clearCart } = cartSlice.actions;\n// dispatch(addItem({ id: 1, name: 'Widget', price: 9.99 }))",
+          "tip": null
+        },
+        {
+          "id": "state_3",
+          "question": "What is prop drilling and how do you solve it?",
+          "difficulty": "Easy",
+          "round": "State Management",
+          "answer": "Prop drilling is when you pass props through multiple layers of components just to get data to a deeply nested child — the middle components don't use the data, they just pass it along. Solutions: For simple cases, Context API works fine — define the value at a high level and consume it directly in the component that needs it. For complex or frequently-updated state, a state management library like Zustand or Redux is better. Component composition is another underused technique — instead of passing data down, you pass the already-rendered child component down as a prop, which cuts out the middleman entirely.",
+          "tip": null
+        },
+        {
+          "id": "state_4",
+          "question": "Have you used Redux Toolkit? What's the difference from classic Redux?",
+          "difficulty": "Medium",
+          "round": "State Management",
+          "answer": "Classic Redux required a lot of boilerplate — separate files for action types, action creators, and reducers, plus manual immutability handling with spread operators. Redux Toolkit consolidates this. Slices combine all three into one. It uses Immer under the hood so you can write mutating-looking code and it handles immutability for you. It also includes createAsyncThunk for async operations and RTK Query for data fetching. The result is significantly less code and fewer bugs from accidental state mutation.",
+          "tip": null
+        },
+        {
+          "id": "state_5",
+          "question": "How do you handle global state for auth and session data?",
+          "difficulty": "Medium",
+          "round": "State Management",
+          "answer": "For auth state, the JWT token itself lives in an httpOnly cookie or localStorage depending on security requirements. The decoded user object and auth status live in either Context or a Redux slice, since most components need to know if the user is logged in. Set up an axios interceptor to attach the token to every request automatically and handle 401 responses by redirecting to login. This means individual components and hooks never need to think about auth headers.",
+          "code": "const AuthContext = createContext(null);\n\nexport function AuthProvider({ children }) {\n  const [user, setUser] = useState(null);\n\n  const login = async (credentials) => {\n    const data = await authApi.login(credentials);\n    localStorage.setItem('token', data.token);\n    setUser(data.user);\n  };\n\n  const logout = () => {\n    localStorage.removeItem('token');\n    setUser(null);\n  };\n\n  return (\n    <AuthContext.Provider value={{ user, login, logout }}>\n      {children}\n    </AuthContext.Provider>\n  );\n}",
+          "tip": "This maps directly to your JWT auth work on UCDM at Capgemini — same pattern applied to React."
+        }
+      ]
+    },
+    {
+      "id": "api",
+      "label": "REST API Integration + TanStack Query",
+      "questions": [
+        {
+          "id": "api_1",
+          "question": "How do you handle loading, error, and empty states when fetching data?",
+          "difficulty": "Easy",
+          "round": "API Integration",
+          "answer": "Every API call has at least four states: loading, success with data, success with empty data, and error. Model this explicitly — either with a useReducer for the three flags, or with TanStack Query which gives you isLoading, isError, and data out of the box. In the UI render each state differently: a spinner or skeleton for loading, an error message with a retry option for errors, an empty state illustration for empty data, and the actual content otherwise.",
+          "code": "const { data, isLoading, isError, error, refetch } = useQuery({\n  queryKey: ['users'],\n  queryFn: () => fetch('/api/users').then(r => r.json())\n});\n\nif (isLoading) return <Spinner />;\nif (isError) return <ErrorMessage msg={error.message} onRetry={refetch} />;\nif (!data?.length) return <EmptyState />;\nreturn <UserList users={data} />;",
+          "tip": null
+        },
+        {
+          "id": "api_2",
+          "question": "What is TanStack Query and what problem does it solve vs useEffect fetching?",
+          "difficulty": "Medium",
+          "round": "API Integration",
+          "answer": "With plain useEffect you have to manually manage loading state, error state, caching, refetching, and race conditions — it's 30+ lines of boilerplate per fetch. TanStack Query handles all of that. It caches responses by query key so navigating back to a page doesn't re-fetch unnecessarily. It automatically refetches on window focus so data stays fresh. It deduplicates simultaneous requests for the same key. The mental model shift: instead of thinking 'fetch data on mount', you think 'declare what data this component needs' — TanStack handles the when and how.",
+          "tip": "This is a 'nice to have' in the JD but mentioning it confidently signals you follow the modern React ecosystem."
+        },
+        {
+          "id": "api_3",
+          "question": "How do you avoid race conditions in API calls inside useEffect?",
+          "difficulty": "Medium",
+          "round": "API Integration",
+          "answer": "A race condition happens when a slow earlier request resolves after a faster later request, and overwrites the correct data. Fix: use a cleanup flag in useEffect. Set a boolean to true when the effect starts, and in the cleanup function set it to false. In the then/catch callback only update state if the flag is still true. The other approach is using AbortController to actually cancel the in-flight request when the effect cleans up. TanStack Query handles this automatically.",
+          "code": "useEffect(() => {\n  let cancelled = false;\n\n  fetchUser(userId).then(data => {\n    if (!cancelled) setUser(data);\n  });\n\n  return () => { cancelled = true; }; // cleanup\n}, [userId]);",
+          "tip": null
+        },
+        {
+          "id": "api_4",
+          "question": "What's the difference between optimistic updates and regular updates?",
+          "difficulty": "Medium",
+          "round": "API Integration",
+          "answer": "A regular update waits for the server to confirm the change before updating the UI. An optimistic update immediately updates the UI as if the operation succeeded, then syncs with the server in the background. If the server returns an error, you roll back the UI change. Optimistic updates make apps feel significantly faster — the user doesn't wait for a round trip for common actions like liking a post or marking a task done. TanStack Query has built-in support for this pattern via onMutate and onError callbacks in useMutation.",
+          "tip": null
+        },
+        {
+          "id": "api_5",
+          "question": "How do you handle API authentication headers across all requests?",
+          "difficulty": "Medium",
+          "round": "API Integration",
+          "answer": "Create a centralised API client — typically an axios instance — with a request interceptor that attaches the Authorization header to every outgoing request automatically. Also add a response interceptor to handle 401 errors globally: if the server returns 401, clear the auth state and redirect to the login page. This means individual components and hooks never need to think about auth headers.",
+          "code": "const apiClient = axios.create({ baseURL: '/api' });\n\napiClient.interceptors.request.use(config => {\n  const token = localStorage.getItem('token');\n  if (token) config.headers.Authorization = `Bearer ${token}`;\n  return config;\n});\n\napiClient.interceptors.response.use(\n  res => res,\n  err => {\n    if (err.response?.status === 401) {\n      store.dispatch(logout());\n    }\n    return Promise.reject(err);\n  }\n);",
+          "tip": null
+        }
+      ]
+    },
+    {
+      "id": "typescript",
+      "label": "TypeScript + Component Architecture",
+      "questions": [
+        {
+          "id": "ts_1",
+          "question": "How do you type React component props using TypeScript interfaces?",
+          "difficulty": "Easy",
+          "round": "TypeScript",
+          "answer": "Define an interface for the props above the component and pass it as the generic parameter to the function. Mark optional props with a question mark and provide default values using destructuring defaults. For children use React.ReactNode as the type. This gives you full autocomplete and type safety at every call site.",
+          "code": "interface ButtonProps {\n  label: string;\n  onClick: () => void;\n  variant?: 'primary' | 'secondary';\n  disabled?: boolean;\n  children?: React.ReactNode;\n}\n\nconst Button = ({ label, onClick, variant = 'primary', disabled = false }: ButtonProps) => {\n  return (\n    <button className={variant} onClick={onClick} disabled={disabled}>\n      {label}\n    </button>\n  );\n};",
+          "tip": null
+        },
+        {
+          "id": "ts_2",
+          "question": "What's the difference between type and interface in TypeScript?",
+          "difficulty": "Easy",
+          "round": "TypeScript",
+          "answer": "Both define the shape of an object and are nearly interchangeable for most use cases. Interfaces can be extended with the extends keyword and can be merged — if you declare the same interface twice TypeScript merges them. Types are more flexible — they can represent unions, intersections, tuples, and primitive aliases, which interfaces can't. Practical rule: use interface for component props and object shapes since they're extendable and error messages are clearer. Use type for unions, utility types, and anything that isn't a plain object shape.",
+          "tip": "Coming from Java: interface in TypeScript is purely structural — TypeScript checks shape, not explicit implementation declarations."
+        },
+        {
+          "id": "ts_3",
+          "question": "How do you type event handlers in React?",
+          "difficulty": "Easy",
+          "round": "TypeScript",
+          "answer": "React provides specific event types for each DOM event. For an input onChange it's React.ChangeEvent with the element type as the generic. For a button onClick it's React.MouseEvent. You can hover over the event handler in your IDE and it tells you the type. The event object then has full type safety — you get autocomplete on event.target.value, event.preventDefault(), and so on.",
+          "code": "// Input change handler\nconst handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {\n  setValue(e.target.value);\n};\n\n// Button click handler\nconst handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {\n  e.preventDefault();\n  submitForm();\n};\n\n// Form submit\nconst handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {\n  e.preventDefault();\n};",
+          "tip": null
+        },
+        {
+          "id": "ts_4",
+          "question": "What are generic components and when would you build one?",
+          "difficulty": "Hard",
+          "round": "TypeScript",
+          "answer": "A generic component is one that works with any data type while still being fully type-safe. Use them when building reusable UI that isn't tied to a specific data shape — like a dropdown, a data table, or a list. Instead of typing the items as any[] or unknown[], use a type parameter and constrain it. The component then infers the type from the data you pass in, so you get autocomplete and type checking on each item's properties.",
+          "code": "interface SelectProps<T> {\n  options: T[];\n  getLabel: (option: T) => string;\n  getValue: (option: T) => string;\n  onChange: (value: T) => void;\n}\n\nfunction Select<T>({ options, getLabel, getValue, onChange }: SelectProps<T>) {\n  return (\n    <select onChange={e => onChange(options.find(o => getValue(o) === e.target.value)!)}>\n      {options.map(opt => (\n        <option key={getValue(opt)} value={getValue(opt)}>{getLabel(opt)}</option>\n      ))}\n    </select>\n  );\n}\n// Usage: <Select<User> options={users} getLabel={u => u.name} getValue={u => u.id} .../>",
+          "tip": null
+        },
+        {
+          "id": "ts_5",
+          "question": "What makes a component reusable? Walk me through designing a reusable table.",
+          "difficulty": "Hard",
+          "round": "TypeScript",
+          "answer": "A reusable component has no hardcoded data or behaviour — everything configurable comes in through props. For a table, separate concerns: the Table component handles layout and rendering, the caller provides columns and data. Columns are a config array — each column has a key, a header label, and optionally a custom render function for cells that need special formatting. This pattern means the same Table component can render users, orders, and transactions with no changes to the component itself.",
+          "code": "interface Column<T> {\n  key: keyof T;\n  header: string;\n  render?: (value: T[keyof T], row: T) => React.ReactNode;\n}\n\ninterface TableProps<T> {\n  data: T[];\n  columns: Column<T>[];\n  keyExtractor: (row: T) => string;\n}\n\nfunction Table<T>({ data, columns, keyExtractor }: TableProps<T>) {\n  return (\n    <table>\n      <thead>\n        <tr>{columns.map(col => <th key={String(col.key)}>{col.header}</th>)}</tr>\n      </thead>\n      <tbody>\n        {data.map(row => (\n          <tr key={keyExtractor(row)}>\n            {columns.map(col => (\n              <td key={String(col.key)}>\n                {col.render ? col.render(row[col.key], row) : String(row[col.key])}\n              </td>\n            ))}\n          </tr>\n        ))}\n      </tbody>\n    </table>\n  );\n}",
+          "tip": null
+        }
+      ]
+    },
+    {
+      "id": "testing",
+      "label": "Testing — Jest + React Testing Library",
+      "questions": [
+        {
+          "id": "test_1",
+          "question": "What's the difference between unit, integration, and E2E tests?",
+          "difficulty": "Easy",
+          "round": "Testing",
+          "answer": "Unit tests test a single function or component in isolation — everything external is mocked. They're fast and pinpoint failures precisely. Integration tests test how multiple units work together — for React, that usually means rendering a component tree and testing that the interaction between components and hooks works correctly, with only the API layer mocked. End-to-end tests run the full application in a real browser — they simulate actual user behaviour from clicking to seeing results. A healthy test suite has many unit tests, a solid layer of integration tests, and a smaller number of E2E tests covering critical user journeys.",
+          "tip": null
+        },
+        {
+          "id": "test_2",
+          "question": "How do you test a component that fetches data from an API?",
+          "difficulty": "Medium",
+          "round": "Testing",
+          "answer": "Mock the API call — either by mocking the module directly with jest.mock, or using MSW (Mock Service Worker) which intercepts actual fetch/axios calls at the network level. MSW is the more realistic approach since your component code runs exactly as it would in production. Use waitFor or findBy queries from React Testing Library to wait for async rendering to complete before asserting. Test three scenarios: the loading state, the success state with mocked data, and the error state with a mocked failure.",
+          "code": "// MSW handler\nconst handlers = [\n  rest.get('/api/users', (req, res, ctx) => {\n    return res(ctx.json([{ id: 1, name: 'Prathamesh' }]));\n  })\n];\n\ntest('shows users after loading', async () => {\n  render(<UserList />);\n  expect(screen.getByText(/loading/i)).toBeInTheDocument();\n  const user = await screen.findByText('Prathamesh');\n  expect(user).toBeInTheDocument();\n});",
+          "tip": null
+        },
+        {
+          "id": "test_3",
+          "question": "What does render, screen, and userEvent do in React Testing Library?",
+          "difficulty": "Easy",
+          "round": "Testing",
+          "answer": "render mounts the component into a virtual DOM — it takes your JSX and sets up the test environment. screen is the query interface — it exposes methods like getByText, getByRole, findByLabelText to find elements the way a user would, by visible text or ARIA role rather than CSS class or test ID. userEvent is the interaction layer — it simulates realistic user interactions like typing, clicking, and tabbing, including the full sequence of events that a real browser fires. It's more realistic than fireEvent which just fires a single event.",
+          "tip": null
+        },
+        {
+          "id": "test_4",
+          "question": "Why should you test behaviour and not implementation details?",
+          "difficulty": "Medium",
+          "round": "Testing",
+          "answer": "If you test implementation details — internal state, method names, component structure — your tests break every time you refactor, even if the behaviour didn't change. RTL's philosophy is to test what the user sees and does. If the user types in a field and clicks submit and sees a success message, that's what you test — not whether a specific function was called or a piece of state has a specific value. Tests written this way survive refactoring, which is exactly when you want your test suite to give you confidence.",
+          "tip": "Production support angle: 'A test that passes when the feature is broken is worse than no test at all.'"
+        },
+        {
+          "id": "test_5",
+          "question": "How do you mock a module or API call in Jest?",
+          "difficulty": "Medium",
+          "round": "Testing",
+          "answer": "For module mocking, jest.mock at the top of the file replaces the entire module with a mock — you then use jest.fn() to define what each exported function returns. For API calls, prefer mocking at the axios instance level or using MSW, so the mock is closer to the real implementation. For a quick unit test, jest.spyOn mocks just one method on an object without replacing the whole module. After each test reset mocks to avoid test pollution.",
+          "code": "// Mock entire module\njest.mock('../api/userApi');\nimport { getUser } from '../api/userApi';\n(getUser as jest.Mock).mockResolvedValue({ id: 1, name: 'Prathamesh' });\n\n// Or spy on a method\nconst spy = jest.spyOn(api, 'deleteUser').mockResolvedValue({ success: true });\n// after test:\nspy.mockRestore();",
+          "tip": null
+        }
+      ]
+    },
+    {
+      "id": "behavioural",
+      "label": "Behavioural + Your Story",
+      "questions": [
+        {
+          "id": "beh_1",
+          "question": "Walk me through your most complex bug fix in production.",
+          "difficulty": "Behavioral",
+          "round": "Behavioural",
+          "answer": "Use STAR format. Situation: A cloud migration had caused a severe performance regression in file downloads — users were waiting a long time before downloads even started. Task: Assigned to investigate root cause on a production system. Action: Reproduced in staging, profiled the network calls. Found the migration changed how file streams were handled — instead of streaming directly, files were being fully loaded into memory server-side before being sent, causing delay proportional to file size. Identified the specific configuration change and implemented a fix that restored streaming behaviour. Result: Download startup time dropped by over 90%. Became a reference case for validating performance on future cloud migrations.",
+          "tip": "90% improvement is a strong number — don't undersell it. Practice this in STAR format out loud."
+        },
+        {
+          "id": "beh_2",
+          "question": "You're applying as a React dev but most of your experience is Angular — why React and why now?",
+          "difficulty": "Behavioral",
+          "round": "Behavioural",
+          "answer": "My 4 years at Capgemini gave me a deep foundation in production front-end work — component architecture, API integration, performance debugging, and shipping to real users under client pressure. The framework was Angular and Java, but the problems I was solving are universal. I've been deliberately transitioning to React because it's where the ecosystem has moved and where I want to take my career. I've built personal projects in React and TypeScript to develop practical experience. I'm not starting from scratch on front-end fundamentals — I'm applying them in a new framework.",
+          "tip": null
+        },
+        {
+          "id": "beh_3",
+          "question": "Tell me about a time you improved performance in a web application.",
+          "difficulty": "Behavioral",
+          "round": "Behavioural",
+          "answer": "Beyond the file download fix, I've also worked on reducing unnecessary re-renders in React components. Using the React DevTools profiler I identified components re-rendering on every keystroke in a search field, traced it to a filter function being recreated on every parent render, and fixed it with useCallback and React.memo on the list component. The broader lesson from production support: performance issues at the front end often have their real root cause somewhere else in the stack.",
+          "tip": "Always mention the tool you used to diagnose — it shows systematic thinking, not guesswork."
+        },
+        {
+          "id": "beh_4",
+          "question": "How do you handle working on unfamiliar codebases?",
+          "difficulty": "Behavioral",
+          "round": "Behavioural",
+          "answer": "Production support for 4 years is essentially constant exposure to unfamiliar codebases under time pressure. My approach: start with the data flow, not the UI. Understand what the key data models are and how they move through the system. Trace a single user journey end to end before trying to understand the whole thing. Read recent git history — what changed recently often tells you more about design decisions than the code itself. On a new team I'd pair with someone for the first week specifically to understand implicit conventions not in the docs.",
+          "tip": null
+        },
+        {
+          "id": "beh_5",
+          "question": "Describe how you mentor or collaborate with other developers.",
+          "difficulty": "Behavioral",
+          "round": "Behavioural",
+          "answer": "At Capgemini I mentored junior developers during onboarding and through ongoing code reviews. My approach to code reviews is to explain the why behind a suggestion, not just flag what to change — a comment that says 'this will cause re-renders because...' teaches the pattern, not just the fix. For onboarding I ran knowledge-transfer sessions covering system architecture first, then walked through a complete flow before letting them pick up tasks independently. I made a point of being available for questions — the faster someone gets unblocked, the faster the team moves.",
+          "tip": "Mentoring juniors actually sharpens your own understanding — you can't explain something you don't really know. Say this in the interview."
+        }
+      ]
+    }
+  ]
+}

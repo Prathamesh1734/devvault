@@ -1,0 +1,537 @@
+{
+  "title": "Frontend Interview Questions & Answers",
+  "source": "PhonePe, Myntra & General React Interview Experiences (LinkedIn)",
+  "categories": [
+    {
+      "id": "dsa",
+      "label": "DSA",
+      "questions": [
+        {
+          "id": "dsa_1",
+          "question": "Best Time to Buy and Sell Stock",
+          "difficulty": "Easy",
+          "company": "PhonePe",
+          "round": "Round 1 - DSA",
+          "answer": "Track the minimum price seen so far and the maximum profit possible.",
+          "code": "function maxProfit(prices) {\n  let minPrice = Infinity, maxProfit = 0;\n  for (let p of prices) {\n    minPrice = Math.min(minPrice, p);\n    maxProfit = Math.max(maxProfit, p - minPrice);\n  }\n  return maxProfit;\n}",
+          "complexity": { "time": "O(n)", "space": "O(1)" },
+          "tip": "Always mention brute force O(n²) first, then optimize to O(n)."
+        },
+        {
+          "id": "dsa_2",
+          "question": "Longest Substring Without Repeating Characters",
+          "difficulty": "Medium",
+          "company": "PhonePe",
+          "round": "Round 1 - DSA",
+          "answer": "Sliding window with a Map to track characters and their latest index.",
+          "code": "function lengthOfLongestSubstring(s) {\n  let map = new Map(), left = 0, max = 0;\n  for (let r = 0; r < s.length; r++) {\n    if (map.has(s[r])) left = Math.max(left, map.get(s[r]) + 1);\n    map.set(s[r], r);\n    max = Math.max(max, r - left + 1);\n  }\n  return max;\n}",
+          "complexity": { "time": "O(n)", "space": "O(min(n, charset))" },
+          "tip": null
+        },
+        {
+          "id": "dsa_3",
+          "question": "Two Sum - Sorted Array (Two Pointer)",
+          "difficulty": "Easy",
+          "company": "PhonePe",
+          "round": "Round 1 - DSA",
+          "answer": "Use two pointers from both ends. Move left pointer if sum is too small, right pointer if too large.",
+          "code": "function twoSum(nums, target) {\n  let l = 0, r = nums.length - 1;\n  while (l < r) {\n    let sum = nums[l] + nums[r];\n    if (sum === target) return [l, r];\n    else if (sum < target) l++;\n    else r--;\n  }\n}",
+          "complexity": { "time": "O(n)", "space": "O(1)" },
+          "tip": "Only works because the array is sorted."
+        },
+        {
+          "id": "dsa_4",
+          "question": "Flatten a deeply nested array without using flat()",
+          "difficulty": "Medium",
+          "company": "Myntra",
+          "round": "Round 1 - Online Assessment",
+          "answer": "Use recursion with reduce, or an iterative stack-based approach.",
+          "code": "// Recursive\nfunction flatten(arr) {\n  return arr.reduce((acc, val) =>\n    Array.isArray(val) ? acc.concat(flatten(val)) : [...acc, val], []);\n}\n\n// Iterative with stack\nfunction flattenIter(arr) {\n  const stack = [...arr], result = [];\n  while (stack.length) {\n    const item = stack.pop();\n    Array.isArray(item) ? stack.push(...item) : result.unshift(item);\n  }\n  return result;\n}",
+          "complexity": { "time": "O(n)", "space": "O(n)" },
+          "tip": null
+        },
+        {
+          "id": "dsa_5",
+          "question": "First non-repeating character in a string (O(n) solution)",
+          "difficulty": "Easy",
+          "company": "Myntra",
+          "round": "Round 1 - Online Assessment",
+          "answer": "Two-pass approach: build frequency map, then find first char with frequency 1.",
+          "code": "function firstUnique(str) {\n  const freq = {};\n  for (let c of str) freq[c] = (freq[c] || 0) + 1;\n  for (let c of str) if (freq[c] === 1) return c;\n  return null;\n}\nfirstUnique('aabbcd'); // 'c'",
+          "complexity": { "time": "O(n)", "space": "O(1) - at most 26 lowercase letters" },
+          "tip": null
+        },
+        {
+          "id": "dsa_6",
+          "question": "Merge K sorted linked lists",
+          "difficulty": "Hard",
+          "company": "Myntra",
+          "round": "Round 2 - DSA",
+          "answer": "Use divide-and-conquer: repeatedly merge pairs of lists until one remains. Alternatively use a min-heap.",
+          "code": "function mergeKLists(lists) {\n  if (!lists.length) return null;\n  while (lists.length > 1) {\n    const merged = [];\n    for (let i = 0; i < lists.length; i += 2) {\n      merged.push(mergeTwoLists(lists[i], lists[i+1] || null));\n    }\n    lists = merged;\n  }\n  return lists[0];\n}",
+          "complexity": { "time": "O(N log k) where N = total nodes, k = number of lists", "space": "O(1)" },
+          "tip": "Explain time/space complexity without being asked."
+        },
+        {
+          "id": "dsa_7",
+          "question": "Lowest Common Ancestor in a Binary Tree",
+          "difficulty": "Medium",
+          "company": "Myntra",
+          "round": "Round 2 - DSA",
+          "answer": "Recursively search left and right subtrees. If both return non-null, current node is the LCA.",
+          "code": "function lowestCommonAncestor(root, p, q) {\n  if (!root || root === p || root === q) return root;\n  const left = lowestCommonAncestor(root.left, p, q);\n  const right = lowestCommonAncestor(root.right, p, q);\n  return left && right ? root : left || right;\n}",
+          "complexity": { "time": "O(n)", "space": "O(h) where h = height" },
+          "tip": null
+        },
+        {
+          "id": "dsa_8",
+          "question": "Sliding Window Maximum",
+          "difficulty": "Hard",
+          "company": "Myntra",
+          "round": "Round 2 - DSA",
+          "answer": "Use a monotonic deque (decreasing order of values) to track the max in the current window.",
+          "code": "function maxSlidingWindow(nums, k) {\n  const deque = [], result = [];\n  for (let i = 0; i < nums.length; i++) {\n    while (deque.length && deque[0] < i - k + 1) deque.shift();\n    while (deque.length && nums[deque[deque.length-1]] < nums[i]) deque.pop();\n    deque.push(i);\n    if (i >= k - 1) result.push(nums[deque[0]]);\n  }\n  return result;\n}",
+          "complexity": { "time": "O(n)", "space": "O(k)" },
+          "tip": null
+        }
+      ]
+    },
+    {
+      "id": "javascript",
+      "label": "JavaScript Deep Dive",
+      "questions": [
+        {
+          "id": "js_1",
+          "question": "Classic var + setTimeout closure trap: what does this print and why?",
+          "difficulty": "Tricky",
+          "company": "PhonePe",
+          "round": "Round 2 - JavaScript Deep Dive",
+          "answer": "Prints '3 3 3'. var is function-scoped, so all three callbacks share the same 'i' variable. By the time the timeouts fire, the loop has finished and i = 3.",
+          "code": "// The trap\nfor (var i = 0; i < 3; i++) {\n  setTimeout(() => console.log(i), 1000); // 3 3 3\n}\n\n// Fix 1 - use let (block-scoped, new binding per iteration)\nfor (let i = 0; i < 3; i++) {\n  setTimeout(() => console.log(i), 1000); // 0 1 2\n}\n\n// Fix 2 - IIFE\nfor (var i = 0; i < 3; i++) {\n  ((j) => setTimeout(() => console.log(j), 1000))(i); // 0 1 2\n}",
+          "tip": "Explain the event loop too: setTimeout callbacks run after the synchronous loop finishes."
+        },
+        {
+          "id": "js_2",
+          "question": "Write debounce from scratch, no libraries",
+          "difficulty": "Medium",
+          "company": "PhonePe",
+          "round": "Round 2 - JavaScript Deep Dive",
+          "answer": "Debounce waits until the user stops calling the function for a given delay, then fires once.",
+          "code": "function debounce(fn, delay) {\n  let timer;\n  return function(...args) {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn.apply(this, args), delay);\n  };\n}\n\n// Usage\nconst handleSearch = debounce((val) => fetchResults(val), 300);",
+          "key_points": [
+            "Debounce waits until user STOPS calling the function",
+            "Throttle limits to once per interval (different concept)",
+            "apply(this, args) preserves context - important for methods",
+            "clearTimeout on each call resets the timer"
+          ],
+          "tip": null
+        },
+        {
+          "id": "js_3",
+          "question": "Write throttle from scratch, return the last call result",
+          "difficulty": "Medium",
+          "company": "Myntra",
+          "round": "Round 3 - Frontend + DSA",
+          "answer": "Throttle limits function execution to once per time interval. Use timestamp comparison.",
+          "code": "function throttle(fn, limit) {\n  let lastCall = 0;\n  return function(...args) {\n    const now = Date.now();\n    if (now - lastCall >= limit) {\n      lastCall = now;\n      return fn.apply(this, args);\n    }\n  };\n}\n// Leading-edge: fires immediately, then waits\n// Trailing-edge: fires after interval ends",
+          "tip": "Use throttle for scroll/resize events, debounce for search inputs."
+        },
+        {
+          "id": "js_4",
+          "question": "Write Promise.all polyfill",
+          "difficulty": "Hard",
+          "company": "PhonePe",
+          "round": "Round 2 - JavaScript Deep Dive",
+          "answer": "Promise.all resolves when ALL promises resolve (preserving order), and rejects immediately on the first rejection.",
+          "code": "Promise.myAll = function(promises) {\n  return new Promise((resolve, reject) => {\n    const results = [];\n    let count = 0;\n    if (!promises.length) return resolve([]);\n    promises.forEach((p, i) => {\n      Promise.resolve(p).then(val => {\n        results[i] = val;\n        count++;\n        if (count === promises.length) resolve(results);\n      }).catch(reject);\n    });\n  });\n};",
+          "tip": "Also mention Promise.allSettled (waits for all, doesn't short-circuit) and Promise.race (first to settle wins)."
+        },
+        {
+          "id": "js_5",
+          "question": "Explain the event loop with a real example",
+          "difficulty": "Medium",
+          "company": "PhonePe",
+          "round": "Round 2 - JavaScript Deep Dive",
+          "answer": "JavaScript is single-threaded. The event loop processes the call stack first, then microtasks (Promises), then macrotasks (setTimeout).",
+          "code": "console.log('1');\nsetTimeout(() => console.log('2'), 0);\nPromise.resolve().then(() => console.log('3'));\nconsole.log('4');\n// Output: 1, 4, 3, 2\n// Reason: sync first, then microtasks (Promise), then macrotasks (setTimeout)",
+          "key_points": [
+            "Call stack - synchronous code",
+            "Microtask queue - Promises, queueMicrotask (drains completely before next macrotask)",
+            "Macrotask queue - setTimeout, setInterval, DOM events"
+          ],
+          "tip": null
+        },
+        {
+          "id": "js_6",
+          "question": "Write a custom event emitter with on(), off(), emit()",
+          "difficulty": "Medium",
+          "company": "Myntra",
+          "round": "Round 3 - Frontend + DSA",
+          "answer": "Implement a pub/sub pattern with an events map storing arrays of listener functions.",
+          "code": "class EventEmitter {\n  constructor() { this.events = {}; }\n\n  on(event, listener) {\n    if (!this.events[event]) this.events[event] = [];\n    this.events[event].push(listener);\n    return this;\n  }\n\n  off(event, listener) {\n    if (this.events[event])\n      this.events[event] = this.events[event].filter(l => l !== listener);\n    return this;\n  }\n\n  emit(event, ...args) {\n    (this.events[event] || []).forEach(l => l(...args));\n    return this;\n  }\n}",
+          "tip": null
+        },
+        {
+          "id": "js_7",
+          "question": "Promises vs Async/Await with an API call example",
+          "difficulty": "Easy",
+          "company": "General",
+          "round": "React Interview",
+          "answer": "Async/Await is syntactic sugar over Promises. Same microtask queue behavior, but async/await is easier to read and debug.",
+          "code": "// Promise chain\nfetch('/api/user')\n  .then(res => res.json())\n  .then(data => console.log(data))\n  .catch(err => console.error(err));\n\n// Async/Await\nasync function getUser() {\n  try {\n    const res = await fetch('/api/user');\n    const data = await res.json();\n    console.log(data);\n  } catch(err) {\n    console.error(err);\n  }\n}",
+          "tip": null
+        },
+        {
+          "id": "js_8",
+          "question": "`this` keyword in objects, normal functions, and arrow functions",
+          "difficulty": "Medium",
+          "company": "General",
+          "round": "React Interview",
+          "answer": "Normal functions have dynamic `this` (depends on caller). Arrow functions inherit `this` lexically from surrounding scope. Object methods use the object before the dot as `this`.",
+          "code": "const obj = {\n  name: 'PhonePe',\n  regular() { console.log(this.name); },    // 'PhonePe'\n  arrow: () => { console.log(this.name); }  // undefined\n};\n\n// Common pitfall: passing method as callback loses `this`\nconst fn = obj.regular;\nfn(); // undefined (or global in sloppy mode)\nfn.bind(obj)(); // 'PhonePe' - fix with bind",
+          "tip": "Common mistake: passing an object method as a callback loses 'this'. Fix: use .bind(this) or wrap in an arrow function."
+        },
+        {
+          "id": "js_9",
+          "question": "Deep Copy vs Shallow Copy",
+          "difficulty": "Easy",
+          "company": "General",
+          "round": "React Interview",
+          "answer": "Shallow copy copies top-level properties but nested objects still share references. Deep copy creates a fully independent clone at all levels.",
+          "code": "// Shallow copy\nconst shallow = { ...original };\nconst shallow2 = Object.assign({}, original);\n\n// Deep copy - simple (no functions/dates/circular refs)\nconst deep = JSON.parse(JSON.stringify(original));\n\n// Modern & safe (handles Dates, Maps, Sets but not functions)\nconst deep2 = structuredClone(original);",
+          "tip": null
+        },
+        {
+          "id": "js_10",
+          "question": "JWT Authentication - where should tokens be stored in the browser?",
+          "difficulty": "Medium",
+          "company": "General",
+          "round": "React Interview",
+          "answer": "Best practice is HttpOnly cookies. localStorage is XSS-vulnerable. HttpOnly cookies can't be read by JS.",
+          "options": {
+            "localStorage": "Persistent, but vulnerable to XSS - JS can read it",
+            "sessionStorage": "Cleared on tab close, still XSS-vulnerable",
+            "httpOnlyCookie": "JS cannot access it, safe from XSS. Mitigate CSRF with SameSite=Strict + CSRF tokens"
+          },
+          "recommendation": "Store JWT in an HttpOnly, Secure, SameSite=Strict cookie. For SPAs: short-lived access tokens in memory + refresh tokens in HttpOnly cookies.",
+          "tip": "PhonePe is a payments app - expect this question. Show you understand why cookie > localStorage."
+        },
+        {
+          "id": "js_11",
+          "question": "ES6+ features used in modern JavaScript",
+          "difficulty": "Easy",
+          "company": "General",
+          "round": "React Interview",
+          "answer": "Key features: let/const, arrow functions, template literals, destructuring, rest/spread, default params, optional chaining (?.), nullish coalescing (??), Promise, async/await, modules (import/export), Map, Set, Symbol, class syntax, Array.from(), Object.entries().",
+          "tip": "Pick 3-4 and give a concrete use-case for each, don't just list them."
+        },
+        {
+          "id": "js_12",
+          "question": "Debouncing vs Throttling",
+          "difficulty": "Easy",
+          "company": "General",
+          "round": "React Interview",
+          "answer": "Debounce: waits until function stops being called for N ms, then fires once. Throttle: fires at most once per N ms interval regardless of how many times called.",
+          "use_cases": {
+            "debounce": "Search input, window resize handler, form validation",
+            "throttle": "Scroll event, mousemove, API rate limiting"
+          },
+          "tip": null
+        },
+        {
+          "id": "js_13",
+          "question": "Find the maximum number in an array using JavaScript",
+          "difficulty": "Easy",
+          "company": "General",
+          "round": "React Interview",
+          "code": "const max = Math.max(...arr);\n// Or\nconst max2 = arr.reduce((a, b) => a > b ? a : b);",
+          "tip": "Mention Math.max(...arr) can cause stack overflow for very large arrays; reduce is safer."
+        },
+        {
+          "id": "js_14",
+          "question": "Find the occurrence/frequency of elements in an array",
+          "difficulty": "Easy",
+          "company": "General",
+          "round": "React Interview",
+          "code": "function frequency(arr) {\n  return arr.reduce((acc, val) => {\n    acc[val] = (acc[val] || 0) + 1;\n    return acc;\n  }, {});\n}\n// { a: 2, b: 1, c: 3 }",
+          "tip": null
+        },
+        {
+          "id": "js_15",
+          "question": "Rest and Spread operators",
+          "difficulty": "Easy",
+          "company": "General",
+          "round": "React Interview",
+          "answer": "Same syntax (...), opposite intent. Spread expands an iterable into individual elements. Rest collects remaining arguments into an array.",
+          "code": "// Spread - expand\nconst merged = { ...obj1, ...obj2 };\nconst copy = [...arr1, ...arr2];\nMath.max(...numbers);\n\n// Rest - collect\nfunction sum(...nums) { return nums.reduce((a,b) => a+b, 0); }\nconst [first, ...rest] = [1, 2, 3]; // first=1, rest=[2,3]",
+          "tip": null
+        }
+      ]
+    },
+    {
+      "id": "security",
+      "label": "Security",
+      "questions": [
+        {
+          "id": "sec_1",
+          "question": "How do you prevent XSS in a form input?",
+          "difficulty": "Medium",
+          "company": "PhonePe",
+          "round": "Round 2 - JavaScript Deep Dive",
+          "answer": "XSS (Cross-Site Scripting) = injecting malicious scripts into a page via user input.",
+          "prevention": [
+            "Sanitize input - strip or encode HTML tags. Use DOMPurify for rich text.",
+            "React escapes JSX values by default - never use dangerouslySetInnerHTML with user input.",
+            "Validate on backend - client-side validation is not enough.",
+            "Encode output - encode < > \" ' & when rendering user content.",
+            "Set CSP header - restricts which scripts can run.",
+            "HttpOnly cookies - XSS can't steal tokens if stored in HttpOnly cookies."
+          ],
+          "tip": null
+        },
+        {
+          "id": "sec_2",
+          "question": "What is a Content Security Policy (CSP) header and why does it matter?",
+          "difficulty": "Hard",
+          "company": "PhonePe",
+          "round": "Round 2 - JavaScript Deep Dive",
+          "answer": "CSP is an HTTP response header that tells the browser which sources are trusted for scripts, styles, images etc. It's the last line of defense against XSS.",
+          "code": "Content-Security-Policy:\n  default-src 'self';\n  script-src 'self' https://trusted-cdn.com;\n  style-src 'self' 'unsafe-inline';\n  img-src 'self' data:;\n  connect-src 'self' https://api.phonepe.com;",
+          "directives": ["default-src", "script-src", "style-src", "img-src", "connect-src", "frame-ancestors (prevents clickjacking)"],
+          "tip": "Mention nonce-based CSP for dynamic scripts - each script tag gets a random nonce value matching the header."
+        },
+        {
+          "id": "sec_3",
+          "question": "Difference between display: inline, inline-block, and block",
+          "difficulty": "Easy",
+          "company": "General",
+          "round": "React Interview",
+          "answer": "block: full width, stacks vertically, respects width/height/margin. inline: flows with text, only content width, ignores width/height/vertical margin. inline-block: flows inline but respects all box model properties.",
+          "examples": {
+            "block": "div, p, h1",
+            "inline": "span, a, strong",
+            "inline-block": "buttons, badges - flows in text but has dimensions"
+          },
+          "tip": null
+        }
+      ]
+    },
+    {
+      "id": "react",
+      "label": "React & Machine Coding",
+      "questions": [
+        {
+          "id": "react_1",
+          "question": "Product search page - state structure before writing any code",
+          "difficulty": "Hard",
+          "company": "PhonePe",
+          "round": "Round 3 - Machine Coding",
+          "answer": "The interviewer watches how you structure state before writing any code. Keep state minimal - derive everything you can.",
+          "code": "// Minimal state\nconst [products, setProducts] = useState([]);\nconst [query, setQuery] = useState('');\nconst [category, setCategory] = useState('all');\nconst [page, setPage] = useState(1);\nconst [loading, setLoading] = useState(false);\nconst [error, setError] = useState(null);\n\nconst ITEMS_PER_PAGE = 10;\n\n// Derived (don't store these)\nconst filtered = products.filter(p =>\n  (category === 'all' || p.category === category) &&\n  p.name.toLowerCase().includes(query.toLowerCase())\n);\nconst paginated = filtered.slice((page-1)*10, page*10);\nconst totalPages = Math.ceil(filtered.length / 10);",
+          "tip": "State should be minimal. If something can be computed from existing state, derive it - don't store it."
+        },
+        {
+          "id": "react_2",
+          "question": "Debounced search input - no useEffect mistakes",
+          "difficulty": "Medium",
+          "company": "PhonePe",
+          "round": "Round 3 - Machine Coding",
+          "answer": "Use a separate debouncedQuery state updated by useEffect with cleanup to avoid memory leaks.",
+          "code": "const [query, setQuery] = useState('');\nconst [debouncedQuery, setDebouncedQuery] = useState('');\n\nuseEffect(() => {\n  const timer = setTimeout(() => setDebouncedQuery(query), 300);\n  return () => clearTimeout(timer); // cleanup prevents memory leak\n}, [query]);\n\nuseEffect(() => {\n  if (debouncedQuery) fetchProducts(debouncedQuery);\n}, [debouncedQuery]);",
+          "common_mistakes": [
+            "Fetching inside the input onChange directly",
+            "Missing cleanup (clearTimeout) in useEffect",
+            "Infinite loop: putting fetch result in state that's in the dependency array"
+          ],
+          "tip": null
+        },
+        {
+          "id": "react_3",
+          "question": "Build infinite scroll - handle 10,000 items without freezing the UI",
+          "difficulty": "Hard",
+          "company": "Myntra",
+          "round": "Round 3 - Frontend + DSA",
+          "answer": "Combine list virtualization, debounced scroll, and API pagination.",
+          "techniques": [
+            "List virtualization - only render visible rows (react-window or react-virtual). DOM has ~20 nodes instead of 10,000.",
+            "Debounce scroll handler - don't fire on every pixel scroll",
+            "API pagination - load 20 items at a time using Intersection Observer"
+          ],
+          "code": "// Intersection Observer for infinite scroll trigger\nconst observer = new IntersectionObserver(entries => {\n  if (entries[0].isIntersecting && hasMore) loadMore();\n});\nobserver.observe(bottomRef.current);",
+          "tip": "Mention layout thrash: happens when you read and write DOM in the same frame. Batch reads/writes or use requestAnimationFrame."
+        },
+        {
+          "id": "react_4",
+          "question": "What causes layout thrash and how do you fix it?",
+          "difficulty": "Medium",
+          "company": "Myntra",
+          "round": "Round 3 - Frontend + DSA",
+          "answer": "Layout thrash = reading layout properties (offsetHeight, clientWidth) then immediately writing DOM styles, forcing the browser to recalculate layout repeatedly.",
+          "code": "// BAD - thrashes layout every iteration\nelements.forEach(el => {\n  const h = el.offsetHeight; // read (forces layout recalc)\n  el.style.height = h + 10 + 'px'; // write\n});\n\n// GOOD - batch reads first, then writes\nconst heights = elements.map(el => el.offsetHeight);\nelements.forEach((el, i) => el.style.height = heights[i] + 10 + 'px');",
+          "tip": "Use requestAnimationFrame to batch DOM writes before the next paint."
+        },
+        {
+          "id": "react_5",
+          "question": "React Reconciliation and React Fiber",
+          "difficulty": "Hard",
+          "company": "General",
+          "round": "React Interview",
+          "answer": "Reconciliation is React's algorithm to diff old and new virtual DOM trees and compute minimal real DOM changes. React Fiber (React 16+) reimplemented reconciliation to support interruptible, priority-based rendering.",
+          "key_points": [
+            "Reconciliation: same component type = update, different type = unmount/remount",
+            "Fiber: work is broken into small units - can pause, resume, abort",
+            "Enables Concurrent Mode: React works on updates in background without blocking UI",
+            "Priority-based scheduling: urgent updates (user input) interrupt lower-priority ones"
+          ],
+          "tip": "Mention useTransition and useDeferredValue as APIs that expose concurrent features to app code."
+        },
+        {
+          "id": "react_6",
+          "question": "Virtual DOM and its benefits",
+          "difficulty": "Easy",
+          "company": "General",
+          "round": "React Interview",
+          "answer": "The Virtual DOM is a lightweight JS object representation of the real DOM. On state change, React creates a new VDOM tree, diffs it (reconciliation), and applies only the changed parts to the real DOM.",
+          "benefits": [
+            "Batched DOM updates - fewer reflows/repaints",
+            "Declarative code - describe what, not how",
+            "Cross-platform - same VDOM concept for React Native"
+          ],
+          "tip": "Be ready for: 'Is Virtual DOM always faster?' - No. For small/static pages, direct DOM manipulation can be faster. VDOM shines at scale."
+        },
+        {
+          "id": "react_7",
+          "question": "Application optimization techniques in React",
+          "difficulty": "Medium",
+          "company": "General",
+          "round": "React Interview",
+          "techniques": [
+            "React.memo - skip re-render if props haven't changed",
+            "useMemo - memoize expensive computations",
+            "useCallback - memoize functions (prevents child re-renders)",
+            "Code splitting - React.lazy + Suspense to load routes on demand",
+            "Virtualization - react-window for long lists",
+            "Avoid context re-renders - split contexts, or use Zustand/Jotai for fine-grained updates",
+            "Lazy state initialization - pass a function to useState for expensive initial values",
+            "Always measure in production mode - dev mode adds overhead"
+          ],
+          "tip": null
+        },
+        {
+          "id": "react_8",
+          "question": "What is a bundler and how does it work?",
+          "difficulty": "Easy",
+          "company": "General",
+          "round": "React Interview",
+          "answer": "A bundler (Webpack, Vite, Parcel, esbuild) takes JS modules and dependencies and combines them into optimized files for the browser.",
+          "steps": ["Build dependency graph", "Transform (Babel/TypeScript)", "Tree shaking (remove dead code)", "Code splitting", "Minification", "Output bundle"],
+          "tip": "Vite uses native ES modules in dev (no bundling, ultra-fast HMR) and Rollup for production builds."
+        }
+      ]
+    },
+    {
+      "id": "managerial",
+      "label": "Managerial & Behavioral",
+      "questions": [
+        {
+          "id": "mgr_1",
+          "question": "Walk me through a frontend bug you fixed in production",
+          "difficulty": "Behavioral",
+          "company": "PhonePe",
+          "round": "Round 4 - Managerial",
+          "answer": "Use STAR format: Situation → Task → Action → Result. Focus on your debugging process, not just the fix.",
+          "template": "We had a production issue where [describe symptom]. I was responsible for [your role]. I identified the root cause by [how: logs, repro, devtools]. The fix was [specific change]. We prevented recurrence by [monitoring/tests added].",
+          "good_examples": ["Memory leak from uncleared event listeners", "Race condition in async calls", "UI freeze from large re-renders", "Broken layout in Safari"],
+          "tip": "Mention tools: Chrome DevTools, React DevTools, Sentry, Lighthouse."
+        },
+        {
+          "id": "mgr_2",
+          "question": "How do you decide when to refactor vs ship?",
+          "difficulty": "Behavioral",
+          "company": "PhonePe",
+          "round": "Round 4 - Managerial",
+          "answer": "Consider business context and impact, not just technical purity.",
+          "framework": {
+            "ship_if": ["Tech debt doesn't block velocity", "Deadline is hard", "Refactor scope is large and can be isolated"],
+            "refactor_if": ["Code is a known bug source", "It blocks other features", "Complexity is compounding"],
+            "best_approach": "Boy scout rule - leave code slightly better than you found it. Refactor incrementally, not in big-bang rewrites."
+          },
+          "tip": null
+        },
+        {
+          "id": "mgr_3",
+          "question": "Your team disagrees on an approach. What do you do?",
+          "difficulty": "Behavioral",
+          "company": "PhonePe",
+          "round": "Round 4 - Managerial",
+          "answer": "Show intellectual humility + decisiveness + team-first thinking.",
+          "strong_answer": "I'd first make sure I understand their reasoning fully. Then I'd present my perspective with data/tradeoffs, not just opinion. If we can't align, I'd suggest a time-boxed spike or proof-of-concept to let the code decide. Ultimately, I can 'disagree and commit' once a decision is made - the team moving together matters more than being right.",
+          "tip": null
+        },
+        {
+          "id": "mgr_4",
+          "question": "Design a component library for a fintech product at scale",
+          "difficulty": "Hard",
+          "company": "PhonePe",
+          "round": "Round 4 - Managerial",
+          "answer": "Cover design tokens, accessibility, API design, versioning, docs, testing, and performance.",
+          "areas": {
+            "tokens": "Design tokens (colors, spacing, typography) as the foundation. Single source of truth.",
+            "accessibility": "WCAG 2.1 AA compliance, keyboard navigation, ARIA roles. Non-negotiable for fintech.",
+            "api_design": "Composable, prop-based. Avoid tightly coupled components.",
+            "versioning": "Semantic versioning, changelog. Breaking changes are major versions.",
+            "docs": "Storybook - interactive playground for every component.",
+            "testing": "Unit tests (Jest), visual regression (Chromatic/Percy), interaction tests (Testing Library).",
+            "performance": "Tree-shakeable exports, lazy loading for heavy components."
+          },
+          "tip": "Mention that PhonePe handles payments - security, trust indicators, and error states must be first-class citizens."
+        },
+        {
+          "id": "mgr_5",
+          "question": "How do you debug a performance issue in production?",
+          "difficulty": "Medium",
+          "company": "Myntra",
+          "round": "Round 4 - Hiring Manager",
+          "steps": [
+            "Reproduce locally - Chrome DevTools Performance tab, find long tasks",
+            "Check Core Web Vitals - LCP, FID/INP, CLS, Time to Interactive",
+            "Network tab - large bundles, blocking resources, waterfall issues",
+            "React DevTools Profiler - find unnecessary re-renders",
+            "Lighthouse audit - automated checklist",
+            "Real User Monitoring - Sentry, Datadog for real-world impact confirmation"
+          ],
+          "fixes": ["Code split", "Lazy load", "memo/useMemo", "Optimize images", "CDN", "Remove unused dependencies"],
+          "tip": null
+        },
+        {
+          "id": "mgr_6",
+          "question": "What would you redesign on Myntra's product listing page and why?",
+          "difficulty": "Behavioral",
+          "company": "Myntra",
+          "round": "Round 4 - Hiring Manager",
+          "answer": "Use the Myntra app before this round. The redesign question is specific to their product.",
+          "framework": [
+            "Identify a real pain point you noticed while using the app",
+            "Frame it as: current state → user problem → proposed solution → measurable impact",
+            "Consider: filter UX, image loading, scroll performance, search relevance, mobile experience"
+          ],
+          "tip": "Use the Myntra app before this round. That redesign question is specific to their product."
+        },
+        {
+          "id": "mgr_7",
+          "question": "Why Myntra over other product companies?",
+          "difficulty": "Behavioral",
+          "company": "Myntra",
+          "round": "Round 5 - HR",
+          "answer": "Fashion tech at this scale is a specific problem. Show you understand it.",
+          "tips": [
+            "Mention scale: millions of SKUs, high-res images, real-time inventory",
+            "Talk about unique frontend challenges: virtual try-on, personalization, seasonal traffic spikes",
+            "Reference something specific from Myntra's tech blog or product"
+          ],
+          "tip": null
+        }
+      ]
+    }
+  ]
+}
