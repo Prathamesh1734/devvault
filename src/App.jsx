@@ -19,16 +19,14 @@ function App() {
   }
 
   return (
-    <div className={isDarkMode ? "dark" : ""}>
+    <div className={isDarkMode ? "dark" : "light"}>
       <div className="flex h-screen bg-white dark:bg-[#191919] text-gray-800 dark:text-gray-200 font-sans transition-colors duration-200">
         <Sidebar
           categories={allCategories}
           activeId={activeCategoryId}
           onSelect={setActiveCategoryId}
           isDarkMode={isDarkMode}
-          toggleTheme={() => {
-            setIsDarkMode(!isDarkMode);
-          }}
+          toggleTheme={() => setIsDarkMode(!isDarkMode)}
         ></Sidebar>
         <main className="flex-1 overflow-y-auto p-10">
           <ContentPanel category={activeCategory}></ContentPanel>
