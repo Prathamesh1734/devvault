@@ -20,15 +20,22 @@ export default function QuestionCard({ item }) {
   );
 
   const renderDynamicBlock = (key, value) => {
+    // Make the key look nice (e.g., "key_points" -> "Key Points")
     const title = key
       .replace(/_/g, " ")
       .replace(/\b\w/g, (l) => l.toUpperCase());
 
     if (Array.isArray(value)) {
+      // Render Arrays as a bulleted list
       return (
-        <div className="mt-3 bg-gray-50 p-4 rounded-md" key={key}>
-          <strong className="text-gray-900 text-sm block mb-2">{title}</strong>
-          <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
+        <div
+          key={key}
+          className="mt-3 bg-gray-50 dark:bg-white/5 p-4 rounded-md transition-colors duration-200"
+        >
+          <strong className="text-gray-900 dark:text-gray-100 text-sm block mb-2">
+            {title}:
+          </strong>
+          <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700 dark:text-gray-300">
             {value.map((point, idx) => (
               <li key={idx}>{point}</li>
             ))}
@@ -36,18 +43,21 @@ export default function QuestionCard({ item }) {
         </div>
       );
     } else if (typeof value === "object") {
+      // Render Objects as key-value pairs (Great for "complexity" or "options")
       return (
         <div
           key={key}
-          className="mt-3 bg-gray-50 p-4 rounded-md border border-gray-100"
+          className="mt-3 bg-gray-50 dark:bg-white/5 p-4 rounded-md border border-gray-100 dark:border-white/10 transition-colors duration-200"
         >
-          <strong className="text-gray-900 text-sm block mb-2">{title}</strong>
-          <div className="space-y-2 text-sm text-gray-700">
+          <strong className="text-gray-900 dark:text-gray-100 text-sm block mb-2">
+            {title}:
+          </strong>
+          <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
             {Object.entries(value).map(([k, v]) => (
               <div key={k}>
-                <span className="font-semibold text-gray-800 capitalize">
+                <span className="font-semibold text-gray-800 dark:text-gray-200 capitalize">
                   {k}:
-                </span>
+                </span>{" "}
                 {v}
               </div>
             ))}
@@ -55,10 +65,15 @@ export default function QuestionCard({ item }) {
         </div>
       );
     } else if (typeof value === "string") {
+      // Render plain strings as text
       return (
-        <div key={key} className="mt-3">
-          <strong className="text-gray-900 text-sm">{title}:</strong>
-          <span className="text-sm text-gray-700">{value}</span>
+        <div key={key} className="mt-3 transition-colors duration-200">
+          <strong className="text-gray-900 dark:text-gray-100 text-sm">
+            {title}:{" "}
+          </strong>
+          <span className="text-sm text-gray-700 dark:text-gray-300">
+            {value}
+          </span>
         </div>
       );
     }
@@ -112,7 +127,6 @@ export default function QuestionCard({ item }) {
 
           {dynamicKeys.length > 0 && (
             <div className="space-y-3">
-              {/* Note: Ensure you add dark classes inside your renderDynamicBlock helper too! */}
               {dynamicKeys.map((key) => renderDynamicBlock(key, item[key]))}
             </div>
           )}
