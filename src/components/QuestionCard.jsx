@@ -43,7 +43,7 @@ export default function QuestionCard({ item }) {
         >
           <strong className="text-gray-900 text-sm block mb-2">{title}</strong>
           <div className="space-y-2 text-sm text-gray-700">
-            {Object.entries(value).map(([k, y]) => (
+            {Object.entries(value).map(([k, v]) => (
               <div key={k}>
                 <span className="font-semibold text-gray-800 capitalize">
                   {k}:
