@@ -8,7 +8,7 @@ export default function Sidebar({
   return (
     <aside className="w-64 bg-gray-50 dark:bg-[#202020] border-r border-gray-200 dark:border-gray-800 flex flex-col transition-colors duration-200">
       <div className="p-4 font-semibold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-        Interview Prep
+        DevVault
       </div>
       <nav className="flex-1 overflow-y-auto">
         <ul className="space-y-1 p-2">
