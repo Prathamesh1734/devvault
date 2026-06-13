@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 export default function QuestionCard({ item }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -132,9 +134,20 @@ export default function QuestionCard({ item }) {
           )}
 
           {item.code && (
-            <pre className="bg-[#1e1e1e] dark:bg-black p-4 rounded-md overflow-x-auto text-sm font-mono text-gray-200 border border-gray-800">
-              <code>{item.code}</code>
-            </pre>
+            <div className="mt-4 rounded-md overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm">
+              <SyntaxHighlighter
+                language="javascript"
+                style={vscDarkPlus}
+                customStyle={{
+                  margin: 0,
+                  padding: "1rem",
+                  fontSize: "0.875rem", // text-sm
+                  backgroundColor: "#1e1e1e", // Keeps a consistent dark BG regardless of the theme
+                }}
+              >
+                {item.code}
+              </SyntaxHighlighter>
+            </div>
           )}
 
           {item.tip && (
