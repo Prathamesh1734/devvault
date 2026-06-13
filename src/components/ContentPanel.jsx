@@ -33,7 +33,7 @@ export default function ContentPanel({ category }) {
         </h1>
 
         {/* Filter Controls */}
-        <div className="flex flex-wrap gap-4 items-center bg-gray-50 dark:bg-white/5 p-4 rounded-lg">
+        <div className="flex flex-wrap gap-4 items-center bg-gray-200 dark:bg-white/3 p-4 rounded-lg">
           <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
             Filter by:
           </span>
@@ -43,7 +43,7 @@ export default function ContentPanel({ category }) {
             <select
               value={selectedDifficulty}
               onChange={(e) => setSelectedDifficulty(e.target.value)}
-              className="bg-white dark:bg-[#202020] border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-sm rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              className="bg-white dark:bg-[#202020] border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-sm rounded-md px2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
             >
               {difficulties.map((diff) => (
                 <option key={diff} value={diff}>
