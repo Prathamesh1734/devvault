@@ -1,0 +1,150 @@
+{
+  "title": "React, JavaScript & TypeScript Interview Questions & Answers",
+  "category": "React / JS / TS / State Management Fundamentals",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is React and why is it efficient?",
+      "difficulty": "Easy",
+      "answer": "React is a JavaScript library for building UI through reusable components.",
+      "reasons_efficient": [
+        "Virtual DOM - batches and minimizes real DOM updates via diffing",
+        "Declarative model - describe the UI for a given state, React handles DOM mutations",
+        "Component-based architecture - reuse and isolate logic",
+        "Fiber architecture - prioritize and interrupt rendering work so UI stays responsive"
+      ],
+      "tip": null
+    },
+    {
+      "id": "q2",
+      "question": "How does React work internally?",
+      "difficulty": "Medium",
+      "answer": "When state changes, React calls the render function to produce a new React element tree (Virtual DOM). It runs reconciliation - diffing the new tree against the previous one using Fiber, which breaks work into units that can be paused, prioritized, and resumed. React computes the minimal set of DOM mutations needed and applies them in a commit phase.",
+      "key_points": [
+        "Render phase: builds new virtual DOM tree",
+        "Reconciliation: diffs old vs new tree",
+        "Fiber: interruptible, prioritized units of work",
+        "Commit phase: applies minimal DOM mutations",
+        "Hooks (useState/useEffect) are tracked per fiber node as a linked list - must be called in same order every render"
+      ],
+      "tip": null
+    },
+    {
+      "id": "q3",
+      "question": "What is the most challenging task you handled in your project?",
+      "difficulty": "Behavioral",
+      "answer": "Personal/experience-based question - no universal answer. Use STAR format (Situation, Task, Action, Result).",
+      "good_examples": [
+        "A performance bottleneck you diagnosed",
+        "A tricky state management refactor",
+        "A tight-deadline feature delivery",
+        "A production bug with unclear root cause"
+      ],
+      "tip": "Show your thought process, the tradeoffs you considered, and a measurable outcome (e.g., 'reduced load time by 40%' or 'eliminated a recurring crash')."
+    },
+    {
+      "id": "q4",
+      "question": "Is JavaScript tightly coupled or loosely coupled?",
+      "difficulty": "Medium",
+      "answer": "JavaScript itself is dynamically-typed and encourages loose coupling through first-class functions, closures, ES modules, and prototypal inheritance. However, how tightly or loosely coupled your code is depends on how you write it.",
+      "key_points": [
+        "Global variables and direct DOM manipulation create tight coupling",
+        "Modules, dependency injection, and pub/sub patterns create loose coupling",
+        "The language provides tools for loose coupling but doesn't enforce it"
+      ],
+      "tip": null
+    },
+    {
+      "id": "q5",
+      "question": "Why do we use TypeScript?",
+      "difficulty": "Easy",
+      "answer": "TypeScript adds static typing on top of JavaScript, catching type errors at compile time instead of runtime.",
+      "benefits": [
+        "Better IDE autocomplete and refactoring support",
+        "Self-documenting code - types act as inline docs",
+        "Safer large-scale refactors",
+        "Fewer runtime bugs (e.g., 'undefined is not a function')",
+        "Compiles to plain JS - no runtime cost"
+      ],
+      "tip": null
+    },
+    {
+      "id": "q6",
+      "question": "How does 'extends' work in TypeScript and what is the difference between type and interface?",
+      "difficulty": "Medium",
+      "answer": "extends lets an interface or type inherit members from another. Interfaces use 'extends', types use intersections (&).",
+      "code": "interface Animal { name: string; }\ninterface Dog extends Animal { breed: string; }\n\ntype Animal2 = { name: string };\ntype Dog2 = Animal2 & { breed: string }; // intersection, not extends",
+      "differences": [
+        "Declaration merging: interfaces can be declared multiple times and merge; types cannot",
+        "Extending: interfaces use 'extends'; types use intersections (&)",
+        "Union/primitives: type can represent unions, primitives, tuples (type ID = string | number); interfaces cannot",
+        "Object shapes: largely interchangeable for plain object shapes"
+      ],
+      "guideline": "Use interface for public API shapes/objects that might be extended. Use type for unions, tuples, and complex compositions.",
+      "tip": null
+    },
+    {
+      "id": "q7",
+      "question": "How does Redux work, from installation to usage in a project?",
+      "difficulty": "Medium",
+      "answer": "A single immutable store holds app state. Components dispatch actions (plain objects describing what happened). Reducers (pure functions) take current state + action and return new state. Store notifies subscribed components, which re-render with new state.",
+      "installation": "npm install redux react-redux",
+      "code": "// 1. Create a reducer\nconst counterReducer = (state = { count: 0 }, action) => {\n  switch (action.type) {\n    case 'INCREMENT': return { count: state.count + 1 };\n    default: return state;\n  }\n};\n\n// 2. Create store\nimport { createStore } from 'redux';\nconst store = createStore(counterReducer);\n\n// 3. Provide store to app\nimport { Provider } from 'react-redux';\n<Provider store={store}><App /></Provider>\n\n// 4. Use in components\nimport { useSelector, useDispatch } from 'react-redux';\nconst count = useSelector(state => state.count);\nconst dispatch = useDispatch();\ndispatch({ type: 'INCREMENT' });",
+      "key_principles": [
+        "Single source of truth",
+        "State is read-only - only changed via dispatched actions",
+        "Changes are made by pure reducer functions"
+      ],
+      "tip": null
+    },
+    {
+      "id": "q8",
+      "question": "Have you used Redux Toolkit (RTK) or TanStack Query?",
+      "difficulty": "Medium",
+      "answer": "Experience-based question. RTK is the modern recommended way to write Redux with less boilerplate. TanStack Query solves server-state (data fetching/caching) rather than client/UI state.",
+      "redux_toolkit": {
+        "description": "Reduces boilerplate significantly. Includes Immer (write 'mutating' code that's actually immutable under the hood), built-in DevTools setup, and createAsyncThunk for async logic.",
+        "code": "import { createSlice, configureStore } from '@reduxjs/toolkit';\n\nconst counterSlice = createSlice({\n  name: 'counter',\n  initialState: { count: 0 },\n  reducers: {\n    increment: (state) => { state.count += 1; } // Immer handles immutability\n  }\n});\n\nexport const { increment } = counterSlice.actions;\nconst store = configureStore({ reducer: { counter: counterSlice.reducer } });"
+      },
+      "tanstack_query": {
+        "description": "Handles caching, background refetching, stale-while-revalidate, and deduplication automatically for server data.",
+        "code": "const { data, isLoading, error } = useQuery({\n  queryKey: ['todos'],\n  queryFn: () => fetch('/api/todos').then(r => r.json())\n});"
+      },
+      "tip": "Many teams use RTK for client state + TanStack Query for server state, reducing boilerplate around loading/error states."
+    },
+    {
+      "id": "q9",
+      "question": "What is the difference between bind and apply in JavaScript?",
+      "difficulty": "Easy",
+      "answer": "Both set the 'this' context for a function. apply calls the function immediately with args as an array. bind returns a new function with 'this' permanently bound, without calling it immediately.",
+      "code": "function greet(greeting, name) {\n  console.log(`${greeting}, ${this.title} ${name}`);\n}\nconst ctx = { title: 'Dr.' };\n\ngreet.call(ctx, 'Hello', 'Smith');    // calls immediately, args individually\ngreet.apply(ctx, ['Hello', 'Smith']); // calls immediately, args as array\n\nconst bound = greet.bind(ctx, 'Hello'); // returns new function, not called yet\nbound('Smith'); // call it later",
+      "related": "call(thisArg, ...args) - like apply but args passed individually, also calls immediately",
+      "tip": "Mnemonic: Apply takes an Array. Bind is for later."
+    },
+    {
+      "id": "q10",
+      "question": "What has been your experience with useCallback and useMemo in real projects?",
+      "difficulty": "Medium",
+      "answer": "useMemo memoizes a computed value, recomputing only when dependencies change - useful for expensive calculations. useCallback memoizes a function reference - useful when passing callbacks to memoized child components (React.memo) to prevent unnecessary re-renders.",
+      "code": "const filteredList = useMemo(() =>\n  items.filter(item => item.category === selectedCategory),\n  [items, selectedCategory]\n);\n\nconst handleClick = useCallback(() => {\n  onSelect(itemId);\n}, [itemId, onSelect]);",
+      "tip": "Don't overuse them - they have their own overhead. Profile first with React DevTools, then memoize only parts causing actual performance issues (expensive computations or components re-rendering due to unstable prop references)."
+    },
+    {
+      "id": "q11",
+      "question": "What is the role of the dependency array in useEffect?",
+      "difficulty": "Medium",
+      "answer": "The dependency array tells React when to re-run the effect - it re-runs only when one of the listed values changes (via Object.is comparison) between renders.",
+      "behaviors": {
+        "no_array": "Effect runs after every render",
+        "empty_array": "Effect runs once, after initial mount only",
+        "with_deps": "Effect runs on mount and whenever any listed dependency changes"
+      },
+      "code": "useEffect(() => {\n  fetchData(userId);\n}, [userId]); // re-fetches whenever userId changes",
+      "common_pitfalls": [
+        "Omitting a dependency that's actually used inside the effect - causes stale closures/bugs (ESLint exhaustive-deps rule catches this)",
+        "Including objects/functions recreated every render - causes infinite loops unless wrapped in useMemo/useCallback"
+      ],
+      "tip": null
+    }
+  ]
+}
